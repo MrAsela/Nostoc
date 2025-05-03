@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nostoc - Anonymous Mycelium Network</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #0a0a0a;
+        }
+        
+        .fungal-bg {
+            background: radial-gradient(circle, #1a1a1a 0%, #0a0a0a 100%);
+        }
+        
+        .fungal-border {
+            border: 1px solid #2d2d2d;
+        }
+        
+        .fungal-card {
+            background: linear-gradient(145deg, #1a1a1a 0%, #121212 100%);
+            border: 1px solid #2d2d2d;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .fungal-highlight {
+            background: linear-gradient(90deg, #2d2d2d 0%, #1a1a1a 100%);
+        }
+        
+        .fungal-text {
+            color: #d1d1d1;
+        }
+        
+        .fungal-accent {
+            color: #8bc34a;
+        }
+        
+        .fungal-danger {
+            color: #ff5252;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .post-card {
+            transition: all 0.2s ease;
+        }
+        
+        .post-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal {
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.7);
+            transition: opacity 0.3s ease;
+        }
+        
+        .textarea-autosize {
+            resize: none;
+            overflow: hidden;
+            min-height: 100px;
+        }
+        
+        .nostoc-logo {
+            position: relative;
+        }
+        
+        .nostoc-logo::before {
+            content: "";
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #8bc34a 0%, transparent 70%);
+            filter: blur(5px);
+            left: -5px;
+            top: -5px;
+            z-index: -1;
+        }
+        
+        .views-badge {
+            position: relative;
+        }
+        
+        .views-badge::after {
+            content: "";
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #8bc34a;
+            border-radius: 50%;
+            right: -2px;
+            top: -2px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.8); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.8); opacity: 0.8; }
+        }
+        
+        .subadmin-request {
+            border-left: 3px solid #8bc34a;
+        }
+        
+        .subadmin-request.pending {
+            border-left: 3px solid #FFA500;
+        }
+        
+        .subadmin-request.approved {
+            border-left: 3px solid #8bc34a;
+        }
+        
+        .subadmin-request.rejected {
+            border-left: 3px solid #ff5252;
+        }
+    </style>
+</head>
+<body class="fungal-bg">
+    <!-- Header -->
+    <header class="bg-black fungal-border shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="nostoc-logo">
+                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16 4C12 4 8 8 8 12C8 16 12 20 16 20C20 20 24 16 24 12C24 8 20 4 16 4Z" fill="#8BC34A"/>
+                            <path d="M16 12C14 12 12 14 12 16C12 18 14 20 16 20C18 20 20 18 20 16C20 14 18 12 16 12Z" fill="#4CAF50"/>
+                            <path d="M16 20C12 20 8 24 8 28C8 28 24 28 24 28C24 24 20 20 16 20Z" fill="#689F38"/>
+                            <path d="M12 8C10 8 8 10 8 12C8 14 10 16 12 16C14 16 16 14 16 12C16 10 14 8 12 8Z" fill="#689F38"/>
+                            <path d="M20 8C18 8 16 10 16 12C16 14 18 16 20 16C22 16 24 14 24 12C24 10 22 8 20 8Z" fill="#689F38"/>
+                        </svg>
+                    </div>
+                    <h1 class="text-2xl font-bold fungal-accent">Nostoc</h1>
+                    <span class="text-xs fungal-text bg-black px-2 py-1 rounded">mycelium network</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="adminLoginBtn" class="px-4 py-2 bg-gray-900 fungal-text rounded-lg hover:bg-gray-800 transition fungal-border">
+                        Admin Portal
+                    </button>
+                    <button id="subAdminRequestBtn" class="px-4 py-2 bg-gray-900 fungal-text rounded-lg hover:bg-gray-800 transition fungal-border hidden">
+                        <i class="fas fa-user-shield mr-1"></i> Sub-Admin Request
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Post Form -->
+        <div class="fungal-card rounded-lg p-6 mb-8 fade-in">
+            <h2 class="text-xl font-semibold mb-4 fungal-accent">Grow a Message</h2>
+            <form id="postForm">
+                <div class="mb-4">
+                    <textarea id="postContent" class="w-full px-4 py-3 fungal-border rounded-lg textarea-autosize focus:outline-none focus:ring-1 focus:ring-green-500 fungal-text bg-gray-900" placeholder="Let your thoughts spread through the network..."></textarea>
+                </div>
+                <div class="flex justify-between items-center">
+                    <div class="text-sm fungal-text opacity-70">
+                        <i class="fas fa-lock mr-1"></i> Your identity dissolves into the mycelium
+                    </div>
+                    <button type="submit" class="px-6 py-2 bg-green-800 text-white rounded-lg hover:bg-green-700 transition fungal-border">
+                        <i class="fas fa-spore fa-fw mr-1"></i> Release Spore
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Posts Section -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold fungal-accent">Fruiting Bodies</h2>
+                <div class="text-sm fungal-text">
+                    <i class="fas fa-sync-alt mr-1 cursor-pointer hover:text-green-500" id="refreshPosts"></i>
+                    <span id="postCount">0</span> spores detected
+                </div>
+            </div>
+
+            <div id="postsContainer" class="space-y-4">
+                <!-- Posts will be dynamically inserted here -->
+            </div>
+
+            <div id="noPostsMessage" class="text-center py-12 fungal-card rounded-lg">
+                <i class="fas fa-spider text-4xl fungal-text opacity-30 mb-4"></i>
+                <h3 class="text-xl font-medium fungal-text opacity-70">The network is silent</h3>
+                <p class="fungal-text opacity-50 mt-2">Be the first to propagate a message</p>
+            </div>
+        </div>
+
+        <!-- Sub-Admin Request Section (Visible only to admin) -->
+        <div id="subAdminSection" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold fungal-accent">Sub-Admin Management</h2>
+                <button id="createSubAdminBtn" class="px-4 py-2 bg-green-800 text-white rounded-lg hover:bg-green-700 transition fungal-border">
+                    <i class="fas fa-user-plus mr-1"></i> Create Sub-Admin
+                </button>
+            </div>
+
+            <!-- Sub-Admin Requests -->
+            <div class="mb-8">
+                <h3 class="text-lg font-medium fungal-accent mb-3">Pending Requests</h3>
+                <div id="subAdminRequestsContainer" class="space-y-4">
+                    <!-- Requests will be dynamically inserted here -->
+                </div>
+                <div id="noRequestsMessage" class="text-center py-8 fungal-card rounded-lg">
+                    <i class="fas fa-inbox text-3xl fungal-text opacity-30 mb-3"></i>
+                    <h4 class="text-lg font-medium fungal-text opacity-70">No pending requests</h4>
+                </div>
+            </div>
+
+            <!-- Existing Sub-Admins -->
+            <div class="mb-8">
+                <h3 class="text-lg font-medium fungal-accent mb-3">Existing Sub-Admins</h3>
+                <div id="subAdminsContainer" class="space-y-3">
+                    <!-- Sub-admins will be dynamically inserted here -->
+                </div>
+                <div id="noSubAdminsMessage" class="text-center py-8 fungal-card rounded-lg">
+                    <i class="fas fa-user-slash text-3xl fungal-text opacity-30 mb-3"></i>
+                    <h4 class="text-lg font-medium fungal-text opacity-70">No sub-admins created yet</h4>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Admin Login Modal -->
+    <div id="adminModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="modal-overlay absolute inset-0"></div>
+        <div class="modal fungal-card rounded-lg shadow-xl z-50 w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold fungal-accent">Mycelium Access</h3>
+                    <button id="closeAdminModal" class="fungal-text hover:text-green-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="adminLoginForm">
+                    <div class="mb-4">
+                        <label class="block fungal-text mb-2" for="adminUsername">Root Name</label>
+                        <input type="text" id="adminUsername" class="w-full px-4 py-2 fungal-border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 fungal-text bg-gray-900" required>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block fungal-text mb-2" for="adminPassword">Hyphae Key</label>
+                        <input type="password" id="adminPassword" class="w-full px-4 py-2 fungal-border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 fungal-text bg-gray-900" required>
+                    </div>
+                    <button type="submit" class="w-full py-2 bg-green-800 text-white rounded-lg hover:bg-green-700 transition fungal-border">
+                        <i class="fas fa-network-wired mr-1"></i> Connect
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sub-Admin Request Modal -->
+    <div id="subAdminRequestModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="modal-overlay absolute inset-0"></div>
+        <div class="modal fungal-card rounded-lg shadow-xl z-50 w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold fungal-accent">Sub-Admin Request</h3>
+                    <button id="closeSubAdminRequestModal" class="fungal-text hover:text-green-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="subAdminRequestForm">
+                    <div class="mb-4">
+                        <label class="block fungal-text mb-2" for="requesterName">Your Name</label>
+                        <input type="text" id="requesterName" class="w-full px-4 py-2 fungal-border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 fungal-text bg-gray-900" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block fungal-text mb-2" for="requesterEmail">Contact (Email/Telegram)</label>
+                        <input type="text" id="requesterEmail" class="w-full px-4 py-2 fungal-border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 fungal-text bg-gray-900" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block fungal-text mb-2" for="requestReason">Why you want sub-admin access</label>
+                        <textarea id="requestReason" class="w-full px-4 py-2 fungal-border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 fungal-text bg-gray-900 textarea-autosize" required></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-2 bg-green-800 text-white rounded-lg hover:bg-green-700 transition fungal-border">
+                        <i class="fas fa-paper-plane mr-1"></i> Submit Request
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Sub-Admin Modal -->
+    <div id="createSubAdminModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="modal-overlay absolute inset-0"></div>
+        <div class="modal fungal-card rounded-lg shadow-xl z-50 w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold fungal-accent">Create Sub-Admin</h3>
+                    <button id="closeCreateSubAdminModal" class="fungal-text hover:text-green-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form id="createSubAdminForm">
+                    <input type="hidden" id="subAdminRequestId">
+                    <div class="mb-4">
+                        <label class="block fungal-text mb-2" for="subAdminUsername">Username</label>
+                        <input type="text" id="subAdminUsername" class="w-full px-4 py-2 fungal-border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 fungal-text bg-gray-900" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block fungal-text mb-2" for="subAdminPassword">Password</label>
+                        <div class="relative">
+                            <input type="password" id="subAdminPassword" class="w-full px-4 py-2 fungal-border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 fungal-text bg-gray-900" required>
+                            <button type="button" id="togglePassword" class="absolute right-3 top-2 fungal-text hover:text-green-500">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block fungal-text mb-2" for="subAdminPermissions">Permissions</label>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="permissionDelete" class="mr-2 accent-green-500" checked>
+                                <label for="permissionDelete" class="fungal-text">Delete posts</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="permissionViewReports" class="mr-2 accent-green-500" checked>
+                                <label for="permissionViewReports" class="fungal-text">View reports</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="permissionManageRequests" class="mr-2 accent-green-500">
+                                <label for="permissionManageRequests" class="fungal-text">Manage sub-admin requests</label>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full py-2 bg-green-800 text-white rounded-lg hover:bg-green-700 transition fungal-border">
+                        <i class="fas fa-user-shield mr-1"></i> Create Sub-Admin
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Modal -->
+    <div id="reportModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="modal-overlay absolute inset-0"></div>
+        <div class="modal fungal-card rounded-lg shadow-xl z-50 w-full max-w-md">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold fungal-accent">Contain Spore</h3>
+                    <button id="closeReportModal" class="fungal-text hover:text-green-500">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <p class="mb-4 fungal-text">This spore appears toxic. Select containment protocol:</p>
+                <form id="reportForm">
+                    <input type="hidden" id="reportPostId">
+                    <div class="space-y-2 mb-6">
+                        <div class="flex items-center fungal-text">
+                            <input type="radio" id="reason1" name="reportReason" value="Toxic Growth" class="mr-2 accent-green-500" required>
+                            <label for="reason1">Toxic Growth</label>
+                        </div>
+                        <div class="flex items-center fungal-text">
+                            <input type="radio" id="reason2" name="reportReason" value="Network Parasite" class="mr-2 accent-green-500">
+                            <label for="reason2">Network Parasite</label>
+                        </div>
+                        <div class="flex items-center fungal-text">
+                            <input type="radio" id="reason3" name="reportReason" value="Spore Flood" class="mr-2 accent-green-500">
+                            <label for="reason3">Spore Flood</label>
+                        </div>
+                        <div class="flex items-center fungal-text">
+                            <input type="radio" id="reason4" name="reportReason" value="Other" class="mr-2 accent-green-500">
+                            <label for="reason4">Unknown Contaminant</label>
+                        </div>
+                    </div>
+                    <div class="mb-4 hidden" id="otherReasonContainer">
+                        <label class="block fungal-text mb-2" for="otherReason">Contaminant Analysis</label>
+                        <textarea id="otherReason" class="w-full px-4 py-2 fungal-border rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 fungal-text bg-gray-900"></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-2 bg-red-800 text-white rounded-lg hover:bg-red-700 transition fungal-border">
+                        <i class="fas fa-biohazard mr-1"></i> Quarantine
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Toast -->
+    <div id="successToast" class="fixed bottom-4 right-4 bg-green-800 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-10 opacity-0 transition-all duration-300 flex items-center fungal-border">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span id="toastMessage">Spore released successfully!</span>
+    </div>
+
+    <script>
+        // Sample data storage (in a real app, this would be a database)
+        let posts = JSON.parse(localStorage.getItem('nostocPosts')) || [
+            {
+                id: "1",
+                content: "The mycelium network remembers everything. Even what you try to forget.",
+                timestamp: new Date(Date.now() - 3600000).toISOString(),
+                reported: false,
+                views: 142
+            },
+            {
+                id: "2",
+                content: "They say mushrooms communicate through electrical signals. What are we saying to each other right now?",
+                timestamp: new Date(Date.now() - 7200000).toISOString(),
+                reported: false,
+                views: 89
+            },
+            {
+                id: "3",
+                content: "Warning: The admin has been pruning certain threads. Be careful what you propagate.",
+                timestamp: new Date(Date.now() - 10800000).toISOString(),
+                reported: true,
+                reportReason: "Network Parasite",
+                views: 256
+            }
+        ];
+        
+        let subAdminRequests = JSON.parse(localStorage.getItem('nostocSubAdminRequests')) || [];
+        let subAdmins = JSON.parse(localStorage.getItem('nostocSubAdmins')) || [];
+        
+        let isAdminLoggedIn = false;
+        const ADMIN_CREDENTIALS = {
+            username: "Asela",
+            password: "Asela@.200M"
+        };
+
+        // DOM Elements
+        const postForm = document.getElementById('postForm');
+        const postContent = document.getElementById('postContent');
+        const postsContainer = document.getElementById('postsContainer');
+        const noPostsMessage = document.getElementById('noPostsMessage');
+        const postCount = document.getElementById('postCount');
+        const refreshPosts = document.getElementById('refreshPosts');
+        const adminModal = document.getElementById('adminModal');
+        const adminLoginBtn = document.getElementById('adminLoginBtn');
+        const subAdminRequestBtn = document.getElementById('subAdminRequestBtn');
+        const closeAdminModal = document.getElementById('closeAdminModal');
+        const adminLoginForm = document.getElementById('adminLoginForm');
+        const reportModal = document.getElementById('reportModal');
+        const closeReportModal = document.getElementById('closeReportModal');
+        const reportForm = document.getElementById('reportForm');
+        const otherReasonContainer = document.getElementById('otherReasonContainer');
+        const successToast = document.getElementById('successToast');
+        const toastMessage = document.getElementById('toastMessage');
+        const subAdminSection = document.getElementById('subAdminSection');
+        const subAdminRequestsContainer = document.getElementById('subAdminRequestsContainer');
+        const noRequestsMessage = document.getElementById('noRequestsMessage');
+        const subAdminsContainer = document.getElementById('subAdminsContainer');
+        const noSubAdminsMessage = document.getElementById('noSubAdminsMessage');
+        const subAdminRequestModal = document.getElementById('subAdminRequestModal');
+        const subAdminRequestForm = document.getElementById('subAdminRequestForm');
+        const closeSubAdminRequestModal = document.getElementById('closeSubAdminRequestModal');
+        const createSubAdminModal = document.getElementById('createSubAdminModal');
+        const createSubAdminForm = document.getElementById('createSubAdminForm');
+        const closeCreateSubAdminModal = document.getElementById('closeCreateSubAdminModal');
+        const createSubAdminBtn = document.getElementById('createSubAdminBtn');
+        const togglePassword = document.getElementById('togglePassword');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPosts();
+            setupEventListeners();
+            autoResizeTextarea();
+            
+            // Increment views for example posts when viewed
+            posts.forEach(post => {
+                if (!post.views) post.views = 0;
+                post.views += Math.floor(Math.random() * 10) + 1;
+            });
+            savePosts();
+        });
+
+        // Event Listeners
+        function setupEventListeners() {
+            // Post form submission
+            postForm.addEventListener('submit', handlePostSubmit);
+            
+            // Refresh posts
+            refreshPosts.addEventListener('click', renderPosts);
+            
+            // Admin modal
+            adminLoginBtn.addEventListener('click', () => adminModal.classList.remove('hidden'));
+            closeAdminModal.addEventListener('click', () => adminModal.classList.add('hidden'));
+            adminLoginForm.addEventListener('submit', handleAdminLogin);
+            
+            // Sub-admin request
+            subAdminRequestBtn.addEventListener('click', () => subAdminRequestModal.classList.remove('hidden'));
+            closeSubAdminRequestModal.addEventListener('click', () => subAdminRequestModal.classList.add('hidden'));
+            subAdminRequestForm.addEventListener('submit', handleSubAdminRequest);
+            
+            // Create sub-admin
+            createSubAdminBtn.addEventListener('click', () => {
+                document.getElementById('subAdminRequestId').value = '';
+                document.getElementById('subAdminUsername').value = '';
+                document.getElementById('subAdminPassword').value = '';
+                createSubAdminModal.classList.remove('hidden');
+            });
+            closeCreateSubAdminModal.addEventListener('click', () => createSubAdminModal.classList.add('hidden'));
+            createSubAdminForm.addEventListener('submit', handleCreateSubAdmin);
+            
+            // Toggle password visibility
+            togglePassword.addEventListener('click', () => {
+                const passwordField = document.getElementById('subAdminPassword');
+                const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordField.setAttribute('type', type);
+                togglePassword.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
+            
+            // Report modal
+            closeReportModal.addEventListener('click', () => reportModal.classList.add('hidden'));
+            reportForm.addEventListener('submit', handleReportSubmit);
+            
+            // Radio button for "Other" reason
+            document.querySelectorAll('input[name="reportReason"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    otherReasonContainer.classList.toggle('hidden', e.target.value !== 'Other');
+                });
+            });
+        }
+
+        // Auto-resize textarea
+        function autoResizeTextarea() {
+            postContent.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+            
+            // Also for other textareas
+            document.querySelectorAll('.textarea-autosize').forEach(textarea => {
+                textarea.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = (this.scrollHeight) + 'px';
+                });
+            });
+        }
+
+        // Handle post submission
+        function handlePostSubmit(e) {
+            e.preventDefault();
+            const content = postContent.value.trim();
+            
+            if (content === '') {
+                showToast('The spore is empty', 'red-800');
+                return;
+            }
+            
+            const newPost = {
+                id: Date.now().toString(),
+                content: content,
+                timestamp: new Date().toISOString(),
+                reported: false,
+                views: 1
+            };
+            
+            posts.unshift(newPost);
+            savePosts();
+            postContent.value = '';
+            postContent.style.height = 'auto';
+            renderPosts();
+            showToast('Spore released into the network', 'green-800');
+        }
+
+        // Handle admin login
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+                isAdminLoggedIn = true;
+                adminModal.classList.add('hidden');
+                adminLoginBtn.innerHTML = '<i class="fas fa-network-wired mr-1"></i> Mycelium Control';
+                adminLoginBtn.classList.remove('bg-gray-900');
+                adminLoginBtn.classList.add('bg-green-800');
+                subAdminRequestBtn.classList.remove('hidden');
+                subAdminSection.classList.remove('hidden');
+                showToast('Root access granted', 'green-800');
+                renderSubAdminRequests();
+                renderSubAdmins();
+                renderPosts(); // Re-render to show delete buttons
+            } else {
+                showToast('Invalid hyphae key', 'red-800');
+            }
+            
+            adminLoginForm.reset();
+        }
+
+        // Handle sub-admin request
+        function handleSubAdminRequest(e) {
+            e.preventDefault();
+            const name = document.getElementById('requesterName').value.trim();
+            const contact = document.getElementById('requesterEmail').value.trim();
+            const reason = document.getElementById('requestReason').value.trim();
+            
+            if (!name || !contact || !reason) {
+                showToast('Please fill all fields', 'red-800');
+                return;
+            }
+            
+            const newRequest = {
+                id: Date.now().toString(),
+                name: name,
+                contact: contact,
+                reason: reason,
+                status: 'pending',
+                timestamp: new Date().toISOString()
+            };
+            
+            subAdminRequests.push(newRequest);
+            saveSubAdminRequests();
+            subAdminRequestModal.classList.add('hidden');
+            subAdminRequestForm.reset();
+            showToast('Request submitted to the network', 'green-800');
+            
+            if (isAdminLoggedIn) {
+                renderSubAdminRequests();
+            }
+        }
+
+        // Handle create sub-admin
+        function handleCreateSubAdmin(e) {
+            e.preventDefault();
+            const username = document.getElementById('subAdminUsername').value.trim();
+            const password = document.getElementById('subAdminPassword').value.trim();
+            const requestId = document.getElementById('subAdminRequestId').value;
+            
+            if (!username || !password) {
+                showToast('Please fill all fields', 'red-800');
+                return;
+            }
+            
+            const permissions = {
+                deletePosts: document.getElementById('permissionDelete').checked,
+                viewReports: document.getElementById('permissionViewReports').checked,
+                manageRequests: document.getElementById('permissionManageRequests').checked
+            };
+            
+            const newSubAdmin = {
+                id: Date.now().toString(),
+                username: username,
+                password: password,
+                permissions: permissions,
+                created: new Date().toISOString()
+            };
+            
+            subAdmins.push(newSubAdmin);
+            saveSubAdmins();
+            
+            // Update request status if this was from a request
+            if (requestId) {
+                const requestIndex = subAdminRequests.findIndex(req => req.id === requestId);
+                if (requestIndex !== -1) {
+                    subAdminRequests[requestIndex].status = 'approved';
+                    subAdminRequests[requestIndex].approvedBy = ADMIN_CREDENTIALS.username;
+                    subAdminRequests[requestIndex].approvedAt = new Date().toISOString();
+                    saveSubAdminRequests();
+                }
+            }
+            
+            createSubAdminModal.classList.add('hidden');
+            createSubAdminForm.reset();
+            showToast('Sub-admin created successfully', 'green-800');
+            renderSubAdminRequests();
+            renderSubAdmins();
+        }
+
+        // Handle report submission
+        function handleReportSubmit(e) {
+            e.preventDefault();
+            const postId = document.getElementById('reportPostId').value;
+            const reason = document.querySelector('input[name="reportReason"]:checked').value;
+            const otherReason = document.getElementById('otherReason').value;
+            
+            const postIndex = posts.findIndex(post => post.id === postId);
+            if (postIndex !== -1) {
+                posts[postIndex].reported = true;
+                posts[postIndex].reportReason = reason === 'Other' ? otherReason : reason;
+                savePosts();
+                showToast('Spore contained for analysis', 'green-800');
+            }
+            
+            reportModal.classList.add('hidden');
+            reportForm.reset();
+            otherReasonContainer.classList.add('hidden');
+        }
+
+        // Render all posts
+        function renderPosts() {
+            if (posts.length === 0) {
+                postsContainer.innerHTML = '';
+                noPostsMessage.classList.remove('hidden');
+                postCount.textContent = '0';
+                return;
+            }
+            
+            noPostsMessage.classList.add('hidden');
+            postCount.textContent = posts.length;
+            
+            postsContainer.innerHTML = '';
+            posts.forEach(post => {
+                const postElement = createPostElement(post);
+                postsContainer.appendChild(postElement);
+            });
+        }
+
+        // Render sub-admin requests
+        function renderSubAdminRequests() {
+            const pendingRequests = subAdminRequests.filter(req => req.status === 'pending');
+            
+            if (pendingRequests.length === 0) {
+                subAdminRequestsContainer.innerHTML = '';
+                noRequestsMessage.classList.remove('hidden');
+                return;
+            }
+            
+            noRequestsMessage.classList.add('hidden');
+            subAdminRequestsContainer.innerHTML = '';
+            
+            pendingRequests.forEach(request => {
+                const requestElement = createRequestElement(request);
+                subAdminRequestsContainer.appendChild(requestElement);
+            });
+        }
+
+        // Render existing sub-admins
+        function renderSubAdmins() {
+            if (subAdmins.length === 0) {
+                subAdminsContainer.innerHTML = '';
+                noSubAdminsMessage.classList.remove('hidden');
+                return;
+            }
+            
+            noSubAdminsMessage.classList.add('hidden');
+            subAdminsContainer.innerHTML = '';
+            
+            subAdmins.forEach(subAdmin => {
+                const subAdminElement = createSubAdminElement(subAdmin);
+                subAdminsContainer.appendChild(subAdminElement);
+            });
+        }
+
+        // Create a single post element
+        function createPostElement(post) {
+            const postDate = new Date(post.timestamp);
+            const formattedDate = postDate.toLocaleString();
+            
+            const postElement = document.createElement('div');
+            postElement.className = 'post-card fungal-card rounded-lg p-6 fade-in';
+            postElement.dataset.id = post.id;
+            
+            let postHTML = `
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex items-center">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-2">
+                            <path d="M12 4C8 4 4 8 4 12C4 16 8 20 12 20C16 20 20 16 20 12C20 8 16 4 12 4Z" fill="#8BC34A"/>
+                            <path d="M12 12C10 12 8 14 8 16C8 18 10 20 12 20C14 20 16 18 16 16C16 14 14 12 12 12Z" fill="#4CAF50"/>
+                        </svg>
+                        <span class="text-sm fungal-text opacity-70">Anonymous Spore</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs fungal-text opacity-50">${formattedDate}</span>
+                        <span class="text-xs fungal-text bg-gray-900 px-2 py-1 rounded-full views-badge" title="Views">${post.views || 0}</span>
+                    </div>
+                </div>
+                <div class="text-gray-200 mb-4 whitespace-pre-line">${post.content}</div>
+                <div class="flex justify-end space-x-3">
+                    <button class="report-btn px-3 py-1 text-sm fungal-danger hover:text-red-400 transition">
+                        <i class="fas fa-skull-crossbones mr-1"></i> Contain
+                    </button>
+            `;
+            
+            if (isAdminLoggedIn) {
+                postHTML += `
+                    <button class="delete-btn px-3 py-1 text-sm text-white bg-red-800 hover:bg-red-700 rounded transition fungal-border">
+                        <i class="fas fa-trash mr-1"></i> Prune
+                    </button>
+                `;
+                
+                if (post.reported) {
+                    postHTML += `
+                        <span class="px-2 py-1 text-xs bg-red-900 text-red-300 rounded fungal-border">
+                            <i class="fas fa-radiation mr-1"></i> ${post.reportReason || 'Contaminated'}
+                        </span>
+                    `;
+                }
+            }
+            
+            postHTML += `</div>`;
+            postElement.innerHTML = postHTML;
+            
+            // Add event listeners to buttons
+            const reportBtn = postElement.querySelector('.report-btn');
+            reportBtn.addEventListener('click', () => {
+                document.getElementById('reportPostId').value = post.id;
+                reportModal.classList.remove('hidden');
+                
+                // Increment views when reported
+                post.views += 1;
+                savePosts();
+            });
+            
+            if (isAdminLoggedIn) {
+                const deleteBtn = postElement.querySelector('.delete-btn');
+                deleteBtn.addEventListener('click', () => {
+                    if (confirm('Prune this spore from the network?')) {
+                        deletePost(post.id);
+                    }
+                });
+            }
+            
+            // Increment views when post is rendered
+            post.views += 1;
+            savePosts();
+            
+            return postElement;
+        }
+
+        // Create a sub-admin request element
+        function createRequestElement(request) {
+            const requestDate = new Date(request.timestamp);
+            const formattedDate = requestDate.toLocaleString();
+            
+            const requestElement = document.createElement('div');
+            requestElement.className = 'subadmin-request pending fungal-card rounded-lg p-6 fade-in';
+            requestElement.dataset.id = request.id;
+            
+            const requestHTML = `
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex items-center">
+                        <i class="fas fa-user-clock text-green-500 mr-2"></i>
+                        <span class="text-sm font-medium fungal-accent">${request.name}</span>
+                    </div>
+                    <span class="text-xs fungal-text opacity-50">${formattedDate}</span>
+                </div>
+                <div class="mb-4">
+                    <div class="text-sm fungal-text mb-2"><span class="font-medium">Contact:</span> ${request.contact}</div>
+                    <div class="text-sm fungal-text"><span class="font-medium">Reason:</span> ${request.reason}</div>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button class="approve-btn px-3 py-1 text-sm text-white bg-green-800 hover:bg-green-700 rounded transition fungal-border">
+                        <i class="fas fa-check mr-1"></i> Approve
+                    </button>
+                    <button class="reject-btn px-3 py-1 text-sm text-white bg-red-800 hover:bg-red-700 rounded transition fungal-border">
+                        <i class="fas fa-times mr-1"></i> Reject
+                    </button>
+                </div>
+            `;
+            
+            requestElement.innerHTML = requestHTML;
+            
+            // Add event listeners to buttons
+            const approveBtn = requestElement.querySelector('.approve-btn');
+            approveBtn.addEventListener('click', () => {
+                document.getElementById('subAdminRequestId').value = request.id;
+                document.getElementById('subAdminUsername').value = request.name.toLowerCase().replace(/\s+/g, '_');
+                document.getElementById('subAdminPassword').value = generatePassword();
+                createSubAdminModal.classList.remove('hidden');
+            });
+            
+            const rejectBtn = requestElement.querySelector('.reject-btn');
+            rejectBtn.addEventListener('click', () => {
+                if (confirm('Reject this sub-admin request?')) {
+                    const requestIndex = subAdminRequests.findIndex(req => req.id === request.id);
+                    if (requestIndex !== -1) {
+                        subAdminRequests[requestIndex].status = 'rejected';
+                        subAdminRequests[requestIndex].approvedBy = ADMIN_CREDENTIALS.username;
+                        subAdminRequests[requestIndex].approvedAt = new Date().toISOString();
+                        saveSubAdminRequests();
+                        renderSubAdminRequests();
+                        showToast('Request rejected', 'green-800');
+                    }
+                }
+            });
+            
+            return requestElement;
+        }
+
+        // Create a sub-admin element
+        function createSubAdminElement(subAdmin) {
+            const createdDate = new Date(subAdmin.created);
+            const formattedDate = createdDate.toLocaleString();
+            
+            const subAdminElement = document.createElement('div');
+            subAdminElement.className = 'subadmin-request approved fungal-card rounded-lg p-4 fade-in';
+            subAdminElement.dataset.id = subAdmin.id;
+            
+            const subAdminHTML = `
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="flex items-center">
+                            <i class="fas fa-user-shield text-green-500 mr-2"></i>
+                            <span class="text-sm font-medium fungal-accent">${subAdmin.username}</span>
+                        </div>
+                        <div class="text-xs fungal-text opacity-70 mt-1">Created: ${formattedDate}</div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="view-btn px-2 py-1 text-xs text-white bg-gray-800 hover:bg-gray-700 rounded transition fungal-border">
+                            <i class="fas fa-eye mr-1"></i> View
+                        </button>
+                        <button class="delete-btn px-2 py-1 text-xs text-white bg-red-800 hover:bg-red-700 rounded transition fungal-border">
+                            <i class="fas fa-trash mr-1"></i> Remove
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-3 text-xs fungal-text">
+                    <span class="font-medium">Permissions:</span> 
+                    ${subAdmin.permissions.deletePosts ? 'Delete' : ''}
+                    ${subAdmin.permissions.viewReports ? '| Reports' : ''}
+                    ${subAdmin.permissions.manageRequests ? '| Requests' : ''}
+                </div>
+            `;
+            
+            subAdminElement.innerHTML = subAdminHTML;
+            
+            // Add event listeners to buttons
+            const viewBtn = subAdminElement.querySelector('.view-btn');
+            viewBtn.addEventListener('click', () => {
+                alert(`Sub-Admin Credentials:\n\nUsername: ${subAdmin.username}\nPassword: ${subAdmin.password}`);
+            });
+            
+            const deleteBtn = subAdminElement.querySelector('.delete-btn');
+            deleteBtn.addEventListener('click', () => {
+                if (confirm('Remove this sub-admin?')) {
+                    deleteSubAdmin(subAdmin.id);
+                }
+            });
+            
+            return subAdminElement;
+        }
+
+        // Generate random password
+        function generatePassword() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+            let password = '';
+            for (let i = 0; i < 12; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return password;
+        }
+
+        // Delete a post
+        function deletePost(postId) {
+            posts = posts.filter(post => post.id !== postId);
+            savePosts();
+            renderPosts();
+            showToast('Spore pruned from network', 'green-800');
+        }
+
+        // Delete a sub-admin
+        function deleteSubAdmin(subAdminId) {
+            subAdmins = subAdmins.filter(sub => sub.id !== subAdminId);
+            saveSubAdmins();
+            renderSubAdmins();
+            showToast('Sub-admin removed', 'green-800');
+        }
+
+        // Save posts to localStorage
+        function savePosts() {
+            localStorage.setItem('nostocPosts', JSON.stringify(posts));
+        }
+
+        // Save sub-admin requests to localStorage
+        function saveSubAdminRequests() {
+            localStorage.setItem('nostocSubAdminRequests', JSON.stringify(subAdminRequests));
+        }
+
+        // Save sub-admins to localStorage
+        function saveSubAdmins() {
+            localStorage.setItem('nostocSubAdmins', JSON.stringify(subAdmins));
+        }
+
+        // Show toast notification
+        function showToast(message, bgColor) {
+            toastMessage.textContent = message;
+            successToast.className = successToast.className.replace(/bg-\S+/, `bg-${bgColor}`);
+            
+            setTimeout(() => {
+                successToast.classList.remove('translate-y-10', 'opacity-0');
+                successToast.classList.add('translate-y-0', 'opacity-100');
+            }, 10);
+            
+            setTimeout(() => {
+                successToast.classList.add('translate-y-10', 'opacity-0');
+                successToast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
